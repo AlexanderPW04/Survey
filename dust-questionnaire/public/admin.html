@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Questionnaire Admin</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main class="container wide">
+    <header class="site-header admin-header">
+      <div>
+        <p class="eyebrow">Admin</p>
+        <h1 id="study-name">Questionnaire admin</h1>
+      </div>
+      <div id="user-box" class="user-box" hidden>
+        <span id="user-email"></span>
+        <button id="signout" class="btn ghost" type="button">Sign out</button>
+      </div>
+    </header>
+
+    <div id="setup-error" class="notice error" role="alert" hidden></div>
+
+    <section id="signin-card" class="card" hidden>
+      <h2>Sign in</h2>
+      <p>Sign in with a Google account that has been added as an admin.</p>
+      <button id="signin" class="btn primary" type="button">Sign in with Google</button>
+    </section>
+
+    <section id="denied-card" class="card" hidden>
+      <h2>Not authorized</h2>
+      <p>You're signed in as <strong id="denied-email"></strong>, but this account isn't an admin.</p>
+      <p class="help">To add it: Firebase console → Firestore Database → collection <code>admins</code> → add a document whose
+        <em>Document ID</em> is the email address in lowercase (any field, e.g. <code>role: "admin"</code>). Then reload this page.</p>
+    </section>
+
+    <div id="app" hidden>
+      <div id="config-errors" class="notice error" role="alert" hidden></div>
+
+      <section class="card">
+        <div class="card-head">
+          <h2>Responses</h2>
+          <p class="stat"><span id="resp-count">0</span> submitted</p>
+        </div>
+        <p class="help">The Excel file has one row per sample and one column per question (retired questions included, so
+          older data never disappears), plus a <em>Data dictionary</em> sheet explaining every column.</p>
+        <div class="row">
+          <button id="export-xlsx" class="btn primary" type="button">Download Excel (.xlsx)</button>
+          <button id="refresh" class="btn" type="button">Refresh</button>
+          <span id="resp-msg" class="status" role="status"></span>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Sample ID</th><th>Submitted</th><th>Version</th></tr></thead>
+            <tbody id="resp-body"></tbody>
+          </table>
+        </div>
+        <p class="help" id="resp-more"></p>
+      </section>
+
+      <section class="card">
+        <div class="card-head">
+          <h2>Sample IDs</h2>
+          <p class="stat"><span id="sample-count">0</span> registered · <span id="sample-used">0</span> used</p>
+        </div>
+        <p class="help">A questionnaire can only be submitted for a registered ID, and only once. Print these on your kits.
+          The CSV includes a personal link for each ID that pre-fills the form (handy for per-kit QR labels).</p>
+
+        <form id="gen-form" class="row align-end">
+          <label class="field">How many
+            <input id="gen-count" type="number" min="1" max="500" value="20" required>
+          </label>
+          <label class="field grow">Batch label (optional)
+            <input id="gen-label" maxlength="60" placeholder="e.g. Kits mailed Nov 2026">
+          </label>
+          <button class="btn primary" id="gen-btn" type="submit">Generate new IDs</button>
+        </form>
+
+        <details class="import">
+          <summary>Register IDs you already have</summary>
+          <form id="import-form">
+            <label class="field">Paste IDs, one per line
+              <textarea id="import-text" rows="5" class="mono"></textarea>
+            </label>
+            <div class="row">
+              <input id="import-label" maxlength="60" placeholder="Batch label (optional)">
+              <button class="btn" type="submit">Register</button>
+            </div>
+          </form>
+        </details>
+
+        <div class="row">
+          <button id="export-samples" class="btn" type="button">Download all IDs (.csv)</button>
+          <span id="sample-msg" class="status" role="status"></span>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Sample ID</th><th>Batch</th><th>Created</th><th>Status</th></tr></thead>
+            <tbody id="sample-body"></tbody>
+          </table>
+        </div>
+        <p class="help" id="sample-more"></p>
+      </section>
+
+      <section class="card">
+        <h2>QR code for the lab website</h2>
+        <div class="row align-end">
+          <label class="field grow">Questionnaire link
+            <input id="qr-url" type="url">
+          </label>
+          <button id="qr-make" class="btn" type="button">Update</button>
+          <button id="qr-download" class="btn primary" type="button">Download PNG</button>
+        </div>
+        <div id="qr" class="qr-box" aria-label="QR code"></div>
+      </section>
+
+      <section class="card">
+        <h2>Questionnaire</h2>
+        <p id="config-summary"></p>
+        <p class="help">To add, change or retire questions, edit <code>public/questions.js</code> and redeploy.</p>
+      </section>
+    </div>
+  </main>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <script type="module" src="admin.js"></script>
+</body>
+</html>

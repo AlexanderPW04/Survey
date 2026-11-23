@@ -1,0 +1,48 @@
+rules_version = '2';
+
+// Security model
+//  • Anyone may CREATE one response, but only for a sample ID that an admin has
+//    registered, and only once (an existing response can't be overwritten).
+//  • Nobody but admins can read anything — participants can't see other answers
+//    or list sample IDs.
+//  • Admins are Google accounts whose lowercase email is a document ID in the
+//    `admins` collection (add them by hand in the Firebase console).
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isAdmin() {
+      return request.auth != null
+        && request.auth.token.email_verified == true
+        && exists(/databases/$(database)/documents/admins/$(request.auth.token.email));
+    }
+
+    match /admins/{email} {
+      allow read: if isAdmin();
+      allow write: if false; // manage admins in the Firebase console
+    }
+
+    match /samples/{sampleId} {
+      allow read, write: if isAdmin();
+    }
+
+    match /responses/{sampleId} {
+      allow create: if
+        exists(/databases/$(database)/documents/samples/$(sampleId))
+        && request.resource.data.keys().hasOnly(['sampleId', 'questionnaireVersion', 'answers', 'submittedAt'])
+        && request.resource.data.keys().hasAll(['sampleId', 'questionnaireVersion', 'answers', 'submittedAt'])
+        && request.resource.data.sampleId == sampleId
+        && request.resource.data.questionnaireVersion is string
+        && request.resource.data.answers is map
+        && request.resource.data.answers.size() <= 200
+        && request.resource.data.submittedAt == request.time;
+
+      // "create" only applies when the document doesn't exist yet, so a second
+      // submission for the same sample ID is an "update" and is denied.
+      allow read, update, delete: if isAdmin();
+    }
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

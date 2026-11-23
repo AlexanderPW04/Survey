@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Dust Sample Questionnaire</title>
+  <link rel="stylesheet" href="style.css">
+  <script type="module" src="form.js"></script>
+</head>
+<body>
+  <main class="container">
+    <header class="site-header">
+      <p class="eyebrow" id="lab-name"></p>
+      <h1 id="study-name">Sample Questionnaire</h1>
+      <p class="lede" id="intro"></p>
+    </header>
+
+    <div id="setup-error" class="notice error" role="alert" hidden></div>
+
+    <form id="questionnaire" novalidate>
+      <section class="card">
+        <div class="question">
+          <label for="sample_id" class="q-label">Sample collection ID <span class="req" aria-hidden="true">*</span></label>
+          <p class="help" id="sample_id_help">Printed on the label of your collection kit, for example <code id="id-example"></code>.</p>
+          <input id="sample_id" name="sample_id" class="mono" autocomplete="off" autocapitalize="characters"
+                 spellcheck="false" aria-describedby="sample_id_help sample_id_error" aria-required="true">
+          <p class="error-msg" id="sample_id_error"></p>
+        </div>
+      </section>
+
+      <section class="card" id="questions" aria-label="Questions"></section>
+
+      <div class="actions">
+        <button type="submit" id="submit-btn" class="btn primary">Submit questionnaire</button>
+        <p id="form-status" class="status" role="status" aria-live="polite"></p>
+      </div>
+    </form>
+
+    <section id="thanks" class="card thanks" tabindex="-1" hidden>
+      <h2>Thank you!</h2>
+      <p>Your answers for sample <strong class="mono" id="thanks-id"></strong> were recorded. You can close this page.</p>
+      <button type="button" class="btn" id="another-btn">Submit for another sample</button>
+    </section>
+
+    <footer class="site-footer" id="footer-text"></footer>
+  </main>
+</body>
+</html>
