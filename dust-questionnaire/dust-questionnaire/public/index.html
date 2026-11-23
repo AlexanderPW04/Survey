@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="referrer" content="no-referrer">
+  <title>Dust Sample Questionnaire</title>
+  <link rel="stylesheet" href="style.css">
+  <script type="module" src="js/form.js"></script>
+</head>
+<body>
+  <main class="container">
+    <header class="site-header">
+      <h1 id="survey-title">Dust Sample Questionnaire</h1>
+      <p class="lede" id="survey-intro"></p>
+    </header>
+
+    <p id="loading" class="status" role="status">Loading…</p>
+
+    <!-- Shown when the page is opened without a kit QR code (e.g. from the lab website) -->
+    <section id="code-entry" class="card" hidden>
+      <h2>Start your questionnaire</h2>
+      <p>Please <strong>scan the QR code on your sample kit</strong> with your phone's camera.
+        If you can't scan it, type the kit code printed under the QR code.</p>
+      <form id="code-form" class="code-form" novalidate>
+        <label for="kit-code" class="q-label">Kit code</label>
+        <p class="help" id="kit-code-help">10 letters and numbers, for example ABCDE-23456.</p>
+        <div class="row">
+          <input id="kit-code" class="mono kit-input" autocomplete="off" autocapitalize="characters" spellcheck="false"
+                 maxlength="16" aria-describedby="kit-code-help kit-code-error">
+          <button class="btn primary" type="submit">Continue</button>
+        </div>
+        <p class="error-msg" id="kit-code-error"></p>
+      </form>
+    </section>
+
+    <section id="message" class="card message" tabindex="-1" hidden>
+      <h2 id="message-title"></h2>
+      <p id="message-text"></p>
+    </section>
+
+    <div id="survey-root"></div>
+
+    <section id="thanks" class="card thanks" tabindex="-1" hidden>
+      <h2>Thank you!</h2>
+      <p id="thanks-text"></p>
+    </section>
+
+    <footer class="site-footer" id="survey-footer"></footer>
+  </main>
+</body>
+</html>
