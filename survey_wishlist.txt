@@ -1,0 +1,10 @@
+Custom survey design UI instead of JS file updates deployed manually
+Admin only static QR code for lab website
+Minimized free response
+Admin accounts
+CSV download
+Firestore hosting
+Results CSV download
+Unique QR code sample ID, no user sample ID visibility, admin can click sample ID and print unique QR code
+Question result summaries in admin dashboard
+Preview function
