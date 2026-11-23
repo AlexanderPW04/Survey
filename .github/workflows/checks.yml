@@ -1,0 +1,81 @@
+name: Prototype checks
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  frontend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm run build
+      - name: Check built frontend for private environment names
+        run: |
+          if grep -R -n -E 'ADMIN_PASSWORD|SESSION_SECRET|DATABASE_URL|postgresql://|postgresql\+psycopg://' dist; then
+            exit 1
+          fi
+
+  postgres-and-browser:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_USER: dust_test
+          POSTGRES_PASSWORD: dust_test
+          POSTGRES_DB: dust_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U dust_test -d dust_test"
+          --health-interval 5s --health-timeout 3s --health-retries 12
+    env:
+      TEST_DATABASE_URL: postgresql+psycopg://dust_test:dust_test@127.0.0.1:5432/dust_test
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+          cache: pip
+      - run: python -m pip install -r requirements-test.txt
+      - run: python -m pytest -q
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - run: npm ci
+        working-directory: frontend
+      - run: npx playwright install --with-deps chromium
+        working-directory: frontend
+      - run: docker build -t dust-survey:ci .
+      - name: Start production container and run browser workflow
+        env:
+          PORT: '8095'
+          E2E_BASE_URL: http://127.0.0.1:8095
+          E2E_ADMIN_PASSWORD: synthetic-ci-password
+          ADMIN_PASSWORD: synthetic-ci-password
+          SESSION_SECRET: synthetic-ci-session-secret-for-test-only
+          DATABASE_URL: postgresql+psycopg://dust_test:dust_test@127.0.0.1:5432/dust_test
+        run: |
+          docker run --name dust-survey-ci --detach --network host \
+            -e PORT -e DATABASE_URL -e ADMIN_PASSWORD -e SESSION_SECRET -e APP_ENV=development dust-survey:ci
+          curl --fail --silent --retry 25 --retry-connrefused --retry-delay 1 --max-time 3 "$E2E_BASE_URL/healthz"
+          npm --prefix frontend run test:e2e
+      - name: Container logs
+        if: failure()
+        run: docker logs dust-survey-ci
