@@ -8,3 +8,4 @@ Results CSV download
 Unique QR code sample ID, no user sample ID visibility, admin can click sample ID and print unique QR code
 Question result summaries in admin dashboard
 Preview function
+Sample ID format: AZAS_000
