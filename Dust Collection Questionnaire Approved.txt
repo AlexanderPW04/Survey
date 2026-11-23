@@ -1,0 +1,15 @@
+Dust Collection Questionnaire
+
+1. Date of dust collection (DD/MM/YYYY)
+2. The household space that was vacuumed for this dust collection (tick all that are applicable):
+Living room, Dining Room, Kitchen, Patio, Hallway, Other(specify)
+3. Type of vacuum used for dust collection:
+Handheld vacuum - type/brand (free response)
+Robotic vacuum - type/brand (free response)
+4. When was this pace last vacuumed before current vacuuming (DD/MM/YYYY):
+5. During the collection period (date of last previous vacuuming to current vacuuming date), were windows closed (i.e. air conditioning)?
+Yes, No, Sometimes closed but not always, Other(specify)
+6. The number of occupants in the household:
+7. The number of pets in the household:
+8. The type of pets in the household (e.g. docs, cats, turtles, birds, other):
+9. Do pets have access to garden or outdoor space?
