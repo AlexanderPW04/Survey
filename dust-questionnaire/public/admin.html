@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Survey Dashboard</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="admin">
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="brand">
+        <span class="brand-mark" aria-hidden="true"></span>
+        <span id="brand-title">Survey dashboard</span>
+      </div>
+      <div id="user-box" class="user-box" hidden>
+        <button id="refresh" class="btn ghost" type="button" title="Load the latest responses and samples">↻ Refresh</button>
+        <span id="user-email"></span>
+        <button id="signout" class="btn ghost" type="button">Sign out</button>
+      </div>
+    </div>
+    <nav id="tabs" class="tabs" role="tablist" aria-label="Dashboard sections" hidden>
+      <button role="tab" id="tab-survey" aria-controls="panel-survey" data-tab="survey">Survey</button>
+      <button role="tab" id="tab-samples" aria-controls="panel-samples" data-tab="samples">Samples &amp; QR codes</button>
+      <button role="tab" id="tab-results" aria-controls="panel-results" data-tab="results">Results</button>
+      <button role="tab" id="tab-share" aria-controls="panel-share" data-tab="share">Lab website QR</button>
+      <button role="tab" id="tab-team" aria-controls="panel-team" data-tab="team">Admins</button>
+    </nav>
+  </header>
+
+  <main class="container wide">
+    <div id="setup-error" class="notice error" role="alert" hidden></div>
+    <p id="loading" class="status" role="status" hidden>Loading…</p>
+
+    <section id="signin-card" class="card narrow" hidden>
+      <h1>Admin sign-in</h1>
+      <p>Sign in with a Google account that has been added as an admin.</p>
+      <button id="signin" class="btn primary" type="button">Sign in with Google</button>
+    </section>
+
+    <section id="denied-card" class="card narrow" hidden>
+      <h1>Not an admin</h1>
+      <p>You're signed in as <strong id="denied-email"></strong>, but this account isn't on the admin list.</p>
+      <p class="help">Ask an existing admin to add this email on the <em>Admins</em> tab. (The very first admin is added once in the
+        Firebase console — see the README.)</p>
+    </section>
+
+    <div id="legacy-note" class="notice" hidden></div>
+
+    <section id="panel-survey" role="tabpanel" aria-labelledby="tab-survey" hidden></section>
+    <section id="panel-samples" role="tabpanel" aria-labelledby="tab-samples" hidden></section>
+    <section id="panel-results" role="tabpanel" aria-labelledby="tab-results" hidden></section>
+    <section id="panel-share" role="tabpanel" aria-labelledby="tab-share" hidden></section>
+    <section id="panel-team" role="tabpanel" aria-labelledby="tab-team" hidden></section>
+  </main>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <script type="module" src="js/admin/main.js"></script>
+</body>
+</html>

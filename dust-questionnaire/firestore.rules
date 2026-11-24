@@ -1,0 +1,100 @@
+rules_version = '2';
+
+// ============================================================================
+//  Security model
+//  • Participants never sign in. Each kit's QR code carries a random, unguessable
+//    "kit code" (the token). A response can only be created for a token an admin
+//    created, that is still active, and that hasn't been used yet — so each kit
+//    can be submitted exactly once, and sequential sample IDs (AZAS_001, …) can't
+//    be guessed into a submission.
+//  • Participants can't read any responses, sample IDs or admin data. The only
+//    things they can read are the published survey and whether their own kit
+//    code is valid/used.
+//  • Admins are Google accounts listed in the `admins` collection (document ID =
+//    lowercase email). Admins add/remove each other from the dashboard; nobody
+//    can remove themselves, so there is always at least one admin.
+// ============================================================================
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function myEmail() { return request.auth.token.email.lower(); }
+
+    function isAdmin() {
+      return request.auth != null
+        && request.auth.token.email_verified == true
+        && exists(/databases/$(database)/documents/admins/$(myEmail()));
+    }
+
+    // ---- Admin accounts -----------------------------------------------------
+    match /admins/{email} {
+      allow read: if isAdmin();
+      allow create: if isAdmin()
+        && email == email.lower()
+        && email.matches('^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$')
+        && request.resource.data.keys().hasOnly(['addedBy', 'addedAt']);
+      allow delete: if isAdmin() && email != myEmail();
+      allow update: if false;
+    }
+
+    // ---- Survey: published copy is public, everything else admin-only -------
+    match /settings/public {
+      allow get: if true;
+    }
+    match /settings/{doc} {
+      allow read, write: if isAdmin();
+    }
+
+    // Published versions are kept forever so old responses stay interpretable.
+    match /versions/{version} {
+      allow read, create: if isAdmin();
+      allow update, delete: if false;
+    }
+
+    // ---- Samples (admin only) -----------------------------------------------
+    match /samples/{sampleId} {
+      allow read, write: if isAdmin();
+    }
+
+    // ---- Kit codes ------------------------------------------------------------
+    // Public may look up ONE code they already hold (to show "already submitted"
+    // before filling in the survey). Listing codes is admin-only.
+    match /tokens/{token} {
+      allow get: if true;
+      allow list, create, delete: if isAdmin();
+      allow update: if isAdmin() || (
+        resource.data.active == true
+        && resource.data.used == false
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['used'])
+        && request.resource.data.used == true
+        && existsAfter(/databases/$(database)/documents/responses/$(token))
+      );
+    }
+
+    // ---- Responses --------------------------------------------------------------
+    match /responses/{token} {
+      allow create: if
+        exists(/databases/$(database)/documents/tokens/$(token))
+        && get(/databases/$(database)/documents/tokens/$(token)).data.active == true
+        && get(/databases/$(database)/documents/tokens/$(token)).data.used == false
+        && getAfter(/databases/$(database)/documents/tokens/$(token)).data.used == true
+        && get(/databases/$(database)/documents/settings/public).data.status == 'open'
+        && request.resource.data.keys().hasOnly(['version', 'answers', 'specify', 'submittedAt'])
+        && request.resource.data.keys().hasAll(['version', 'answers', 'specify', 'submittedAt'])
+        && request.resource.data.version == get(/databases/$(database)/documents/settings/public).data.version
+        && request.resource.data.answers is map
+        && request.resource.data.answers.size() <= 150
+        && request.resource.data.specify is map
+        && request.resource.data.specify.size() <= 150
+        && request.resource.data.submittedAt == request.time;
+
+      // "create" only applies when no response exists yet, so a second
+      // submission for the same kit is an update and is refused.
+      allow read, delete: if isAdmin();
+      allow update: if false;
+    }
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
